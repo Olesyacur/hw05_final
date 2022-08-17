@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Post, Group
+from .models import Post, Group, Comment
 
 
 @admin.register(Post)
@@ -14,6 +14,7 @@ class PostAdmin(admin.ModelAdmin):
     search_fields - поиск по тексту поста
     list_filter - фильтр по дате публикации.
     """
+
     list_display = (
         'pk',
         'text',
@@ -27,4 +28,22 @@ class PostAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-admin.site.register(Group)
+admin.site.register(Group, prepopulated_fields = {"slug": ("title",)})
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    """
+    Интерфейс комментарий на странице сайта.
+    """
+
+    list_display = (
+        'pk',
+        'post',
+        'author',
+        'text',
+        'created',
+    )
+    search_fields = ('post',)
+    list_filter = ('post',)
+    empty_value_display = '-пусто-'

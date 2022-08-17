@@ -9,7 +9,7 @@ class PostForm(ModelForm):
         fields = ('text', 'group', 'image')
         labels = {'text': 'Текст сообщения', 'group': 'Группа'}
         widgets = {
-            'text': Textarea(),
+            'text': Textarea(attrs={'cols': 40, 'rows': 10}),
         }
 
 

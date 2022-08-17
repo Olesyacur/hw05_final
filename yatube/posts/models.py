@@ -12,10 +12,11 @@ class Group(models.Model):
     Создает объект сообщества пользователей.
 
     Ключевые аргументы:
-    title - имя группы
+    title - имя сообщества
     slug - url
-    description - описание группы.
+    description - описание сообщества.
     """
+
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField()
@@ -25,7 +26,7 @@ class Group(models.Model):
         verbose_name_plural = 'Сообщества'
 
     def __str__(self) -> str:
-        return f'Сообщество: {self.title}'
+        return self.title
 
 
 class Post(models.Model):
@@ -38,6 +39,7 @@ class Post(models.Model):
     author - привязка к автору
     group - привязка к сообществу/группе.
     """
+
     text = models.TextField(
         'Текст поста',
         help_text='Введите текст поста')
@@ -69,7 +71,6 @@ class Post(models.Model):
     )
 
     class Meta:
-        # количество постов на странице
         ordering = ('-pub_date',)
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
@@ -80,6 +81,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     """Комментарии пользователей"""
+
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
@@ -109,6 +111,7 @@ class Comment(models.Model):
 
 class Follow(models.Model):
     """Оформление подписок"""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
