@@ -27,7 +27,7 @@ class PostModelTest(TestCase):
             PostModelTest.post: PostModelTest.post.text[:15],
             PostModelTest.group: PostModelTest.group.title
         }
-    
+
         for model, test_model in test_models.items():
             with self.subTest(model=model):
                 self.assertEqual(str(model), test_model)
