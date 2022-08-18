@@ -1,4 +1,3 @@
-from genericpath import exists
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -44,7 +43,7 @@ def profile(request, username):
     paginator = Paginator(post_list_user, constants.COUNT_POSTS_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     following = False
     if user.is_authenticated:
         following = Follow.objects.filter(
