@@ -28,7 +28,7 @@ class PostAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-admin.site.register(Group, prepopulated_fields={"slug": ("title",)})
+admin.site.register(Group, prepopulated_fields={'slug': ('title',)})
 
 
 @admin.register(Comment)
@@ -44,6 +44,6 @@ class CommentAdmin(admin.ModelAdmin):
         'text',
         'created',
     )
-    search_fields = ('post',)
+    search_fields = ('text',)
     list_filter = ('post',)
     empty_value_display = '-пусто-'

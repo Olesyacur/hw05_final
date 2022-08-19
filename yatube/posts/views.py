@@ -11,7 +11,7 @@ from .forms import PostForm, CommentForm
 
 @cache_page(20, key_prefix='index_page')
 def index(request):
-    post_list = Post.objects.select_related('author').all()
+    post_list = Post.objects.select_related('author', 'group').all()
     paginator = Paginator(post_list, constants.COUNT_POSTS_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -62,7 +62,7 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    post_count = Post.objects.select_related('author').count()
+    post_count = post.author.posts.count()
     form = CommentForm(request.POST or None)
     comments = post.comments.all()
     context = {
