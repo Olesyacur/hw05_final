@@ -22,9 +22,7 @@
         <a href="{% url 'posts:profile' comment.author.username %}"> 
           {{ comment.author.username }} 
         </a>
-        <a> 
-          {{ comment.created }} 
-        </a>
+        {{ comment.created }} 
       </h5>
       <p> 
         {{ comment.text }} 
