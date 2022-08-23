@@ -109,7 +109,7 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_create_new_post_non_author(self):
-        """Не автором пост не создается"""
+        """Не автором пост не создается."""
         posts_count = Post.objects.count()
         new_text = 'Новый пост'
         form_data = {
