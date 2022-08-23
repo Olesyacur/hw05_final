@@ -3,6 +3,7 @@ from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase, Client
+from django.core.cache import cache
 
 from posts.models import Post, Group
 
@@ -10,6 +11,7 @@ User = get_user_model()
 
 
 class PostUrlTest(TestCase):
+    
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -37,6 +39,8 @@ class PostUrlTest(TestCase):
         # Создаем автора
         self.author_client = Client()
         self.author_client.force_login(PostUrlTest.user)
+
+        cache.clear()
 
     def test_urls_exists_at_desired_location(self):
         """Страницы доступны любому пользователю."""
@@ -88,12 +92,12 @@ class PostUrlTest(TestCase):
         )
 
     def test_url_not_exists_all_at_desired_location(self):
-        """Запрос к несуществующей странице вернет ошибку"""
+        """Запрос к несуществующей странице вернет ошибку."""
         response = self.guest_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_url_author_exists_at_desired_location(self):
-        """Страница доступна только автору"""
+        """Страница доступна только автору."""
 
         # Создаем не автора, но авторизованного пользователя
         not_author_client = Client()
@@ -109,12 +113,12 @@ class PostUrlTest(TestCase):
         )
 
     def test_url_authorized_exists_at_desired_location(self):
-        """Страница доступна только авторизованному пользователю"""
+        """Страница доступна только авторизованному пользователю."""
         response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_comment_authorized(self):
-        """Комментарии доступны только авторизованному пользователю"""
+        """Комментарии доступны только авторизованному пользователю."""
         response = self.authorized_client.get(
             f'/posts/{self.post.id}/comment/',
             follow=True
@@ -122,7 +126,7 @@ class PostUrlTest(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_follow_profile_authorized(self):
-        """Подписаться доступно только авторизованному пользователю"""
+        """Подписаться доступно только авторизованному пользователю."""
         response = self.authorized_client.get(
             f'/profile/{PostUrlTest.user}/follow/',
             follow=True
@@ -130,7 +134,7 @@ class PostUrlTest(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_unfollow_profile_authorized(self):
-        """Отписаться доступно только авторизованному пользователю"""
+        """Отписаться доступно только авторизованному пользователю."""
         response = self.authorized_client.get(
             f'/profile/{PostUrlTest.user}/unfollow/',
             follow=True

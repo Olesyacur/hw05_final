@@ -20,6 +20,7 @@ TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostPagesTests(TestCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -189,7 +190,7 @@ class PostPagesTests(TestCase):
         self.assertIs(response.context['is_edit'], True)
 
     def test_edit_post_absence(self):
-        """Редакция поста при смене группы не появляется в старой группе"""
+        """Редакция поста при смене группы не появляется в старой группе."""
 
         PostPagesTests.group_2 = Group.objects.create(
             title='Тестовая группа2',
@@ -208,6 +209,7 @@ class PostPagesTests(TestCase):
 
 
 class FollowViewsTest(TestCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -233,7 +235,7 @@ class FollowViewsTest(TestCase):
         self.author_client.force_login(FollowViewsTest.user)
 
     def test_follow_new_post(self):
-        """Новая запись автора появляется в ленте подписчиков"""
+        """Новая запись автора появляется в ленте подписчиков."""
         post_2 = Post.objects.create(
             author=self.user,
             text='Новый пост',
@@ -254,7 +256,7 @@ class FollowViewsTest(TestCase):
         )
 
     def test_unfollow_new_post(self):
-        """Новая запись автора не появляется в ленте у не подписчиков"""
+        """Новая запись автора не появляется в ленте у не подписчиков."""
         post_2 = Post.objects.create(
             author=self.user,
             text='Новый пост',
@@ -276,6 +278,7 @@ class FollowViewsTest(TestCase):
 
 
 class PaginatorViewsTest(TestCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -339,7 +342,7 @@ class PaginatorViewsTest(TestCase):
         self.assertEqual(len(response.context['page_obj'].object_list), 3)
 
     def test_cache_index(self):
-        """Проверяет работу кэша главной страницы"""
+        """Проверяет работу кэша главной страницы."""
         response = self.authorized_client.get(reverse('posts:index'))
         cach_one = response.content
         Post.objects.all().delete()

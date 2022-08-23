@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% load cache %}
 
-{% block title %}
-  Последние обновления на странице
-{% endblock %}
+{% block title %}Последние обновления на странице{% endblock %}
 
 {% block content %}
   {% include 'posts/includes/switcher.html' with index=True %}

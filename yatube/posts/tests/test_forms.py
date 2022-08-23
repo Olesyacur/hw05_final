@@ -7,6 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 from posts.forms import PostForm
 from posts.models import Post, Group, Comment
@@ -18,6 +19,7 @@ TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostCreateFormTests(TestCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -61,9 +63,13 @@ class PostCreateFormTests(TestCase):
         # Создаем автора
         self.author_client = Client()
         self.author_client.force_login(PostCreateFormTests.user)
+        # Создаем не авторизованого пользователя
+        self.non_author_client = Client()
+
+        cache.clear()
 
     def test_create_post_new_post(self):
-        """При отправке валидной формы создается новый пост"""
+        """При отправке валидной формы создается новый пост."""
         posts_count = Post.objects.count()
 
         form_data = {
@@ -83,11 +89,12 @@ class PostCreateFormTests(TestCase):
                 text=PostCreateFormTests.post.text,
                 group=PostCreateFormTests.post.group.id,
                 image=PostCreateFormTests.post.image,
+                id=PostCreateFormTests.post.id,
             ).exists()
         )
 
     def test_create_new_post_existing_slug(self):
-        """При отправке невалидной формы пост не создается"""
+        """При отправке невалидной формы пост не создается."""
         posts_count = Post.objects.count()
         form_data = {
             'group': PostCreateFormTests.post.group.slug,
@@ -106,7 +113,7 @@ class PostCreateFormTests(TestCase):
         posts_count = Post.objects.count()
         new_text = 'Новый пост'
         form_data = {
-            'group': PostCreateFormTests.post.group.slug,
+            'group': self.post.group,
             'text': new_text,
         }
         response = self.guest_client.post(
@@ -121,17 +128,17 @@ class PostCreateFormTests(TestCase):
         )
         self.assertFalse(
             Post.objects.filter(
-                group=PostCreateFormTests.group,
+                group=self.post.group,
                 text=new_text,
             ).exists()
         )
 
     def test_post_edit(self):
-        """При отправке валидной формы пост редактируется"""
+        """При отправке валидной формы пост редактируется."""
         posts_count = Post.objects.count()
         r = 'Редакция'
         form_data = {
-            'group': PostCreateFormTests.post.group.id,
+            'group': self.post.group.id,
             'text': r
         }
         response = self.author_client.post(
@@ -142,7 +149,7 @@ class PostCreateFormTests(TestCase):
 
         self.assertTrue(
             Post.objects.filter(
-                group=PostCreateFormTests.group.id,
+                group=self.post.group.id,
                 text=r,
                 id=PostCreateFormTests.post.id
             ).exists()
@@ -150,14 +157,15 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertFalse(
             Post.objects.filter(
-                group=PostCreateFormTests.group,
-                text='Тестовый пост',
+                group=self.post.group,
+                text=self.post.text,
             ).exists()
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_comment(self):
-        """При отправке валидной формы пост комментируется"""
+        """При отправке валидной формы пост комментируется."""
+        comment_count = Comment.objects.filter().count()
         com = 'Комментарий'
         form_data = {'text': com}
         response = self.author_client.post(
@@ -176,3 +184,27 @@ class PostCreateFormTests(TestCase):
             ).exists()
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+
+    def test_post_non_comment(self):
+        """При отправке не авторизованным пользователем комментария пост не комментируется."""
+        comment_count = Comment.objects.filter().count()
+        com = 'Комментарий'
+        form_data = {'text': com}
+        response = self.non_author_client.post(
+            reverse(
+                'posts:add_comment',
+                args={PostCreateFormTests.post.id}
+            ),
+            data=form_data,
+            follow=True,
+        )
+
+        self.assertFalse(
+            Comment.objects.filter(
+                text=com,
+                id=PostCreateFormTests.post.id
+            ).exists()
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(Comment.objects.count(), comment_count)
