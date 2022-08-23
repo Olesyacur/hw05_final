@@ -11,7 +11,7 @@ User = get_user_model()
 
 
 class PostUrlTest(TestCase):
-    
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

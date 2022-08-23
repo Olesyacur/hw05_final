@@ -187,7 +187,8 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(Comment.objects.count(), comment_count + 1)
 
     def test_post_non_comment(self):
-        """При отправке не авторизованным пользователем комментария пост не комментируется."""
+        """При отправке не авторизованным пользователем комментария пост
+         не комментируется."""
         comment_count = Comment.objects.filter().count()
         com = 'Комментарий'
         form_data = {'text': com}
