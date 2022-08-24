@@ -113,33 +113,21 @@ class PostUrlTest(TestCase):
         )
 
     def test_url_authorized_exists_at_desired_location(self):
-        """Страница доступна только авторизованному пользователю."""
-        response = self.authorized_client.get('/create/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_comment_authorized(self):
-        """Комментарии доступны только авторизованному пользователю."""
-        response = self.authorized_client.get(
+        """Создание, комментирование, подписаться и отписаться
+        доступно только авторизованному пользователю."""
+        post_urls = (
+            '/create/',
             f'/posts/{self.post.id}/comment/',
-            follow=True
-        )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_follow_profile_authorized(self):
-        """Подписаться доступно только авторизованному пользователю."""
-        response = self.authorized_client.get(
             f'/profile/{PostUrlTest.user}/follow/',
-            follow=True
-        )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_unfollow_profile_authorized(self):
-        """Отписаться доступно только авторизованному пользователю."""
-        response = self.authorized_client.get(
             f'/profile/{PostUrlTest.user}/unfollow/',
-            follow=True
         )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        for address in post_urls:
+            with self.subTest(address=address):
+                response = self.authorized_client.get(
+                    address,
+                    follow=True
+                )
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_public_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""

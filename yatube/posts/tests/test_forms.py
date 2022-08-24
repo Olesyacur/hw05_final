@@ -63,8 +63,6 @@ class PostCreateFormTests(TestCase):
         # Создаем автора
         self.author_client = Client()
         self.author_client.force_login(PostCreateFormTests.user)
-        # Создаем не авторизованого пользователя
-        self.non_author_client = Client()
 
         cache.clear()
 
@@ -90,7 +88,7 @@ class PostCreateFormTests(TestCase):
                 group=PostCreateFormTests.post.group.id,
                 image=PostCreateFormTests.post.image,
                 id=PostCreateFormTests.post.id,
-            ).exists()
+            ).exclude().exists()
         )
 
     def test_create_new_post_existing_slug(self):
@@ -192,7 +190,7 @@ class PostCreateFormTests(TestCase):
         comment_count = Comment.objects.filter().count()
         com = 'Комментарий'
         form_data = {'text': com}
-        response = self.non_author_client.post(
+        response = self.guest_client.post(
             reverse(
                 'posts:add_comment',
                 args={PostCreateFormTests.post.id}

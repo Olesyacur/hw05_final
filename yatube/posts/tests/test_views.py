@@ -94,19 +94,20 @@ class PostPagesTests(TestCase):
                 self.assertTemplateUsed(response, template)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def check_page_post(self, post):
+    def check_page_post(self, context):
+        if 'post' in context:
+            post = context['post']
+        else:
+            post = context['page_obj'][0]
         self.assertEqual(post.author, PostPagesTests.post.author)
         self.assertEqual(post.group, PostPagesTests.post.group)
         self.assertEqual(post.text, PostPagesTests.post.text)
+        self.assertEqual(post.image, PostPagesTests.post.image)
 
     def test_index_page_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse('posts:index'))
-        self.check_page_post(response.context['page_obj'][0])
-        self.assertEqual(
-            response.context['page_obj'][0].image,
-            PostPagesTests.post.image
-        )
+        self.check_page_post(response.context)
 
     def test_group_list_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
@@ -115,12 +116,8 @@ class PostPagesTests(TestCase):
                     kwargs={'slug': self.group.slug},
                     )
         )
-        self.check_page_post(response.context['page_obj'][0])
+        self.check_page_post(response.context)
         self.assertEqual(response.context['group'], PostPagesTests.group)
-        self.assertEqual(
-            response.context['page_obj'][0].image,
-            PostPagesTests.post.image
-        )
 
     def test_profile_page_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
@@ -128,12 +125,8 @@ class PostPagesTests(TestCase):
                                               kwargs={
                                                       'username': 'author'
                                                       }))
-        self.check_page_post(response.context['page_obj'][0])
+        self.check_page_post(response.context)
         self.assertEqual(response.context['author'], PostPagesTests.user)
-        self.assertEqual(
-            response.context['page_obj'][0].image,
-            PostPagesTests.post.image
-        )
 
     def test_post_detail_page_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -147,13 +140,7 @@ class PostPagesTests(TestCase):
             )
         )
 
-        self.check_page_post(response.context['post'])
-        self.assertEqual(response.context['post'].author, PostPagesTests.user)
-        self.assertEqual(response.context['post_count'], 1)
-        self.assertEqual(
-            response.context['post'].image,
-            PostPagesTests.post.image
-        )
+        self.check_page_post(response.context)
 
     def test_create_post_page_show_correct_context(self):
         """Шаблон create_post сформирован с правильным контекстом."""
@@ -344,18 +331,18 @@ class PaginatorViewsTest(TestCase):
     def test_cache_index(self):
         """Проверяет работу кэша главной страницы."""
         response = self.authorized_client.get(reverse('posts:index'))
-        cach_one = response.content
+        full_page = response.content
         Post.objects.all().delete()
         response = self.authorized_client.get(reverse('posts:index'))
-        cach_two = response.content
+        cached_page = response.content
         self.assertEqual(
-            cach_one,
-            cach_two
+            full_page,
+            cached_page
         )
         cache.clear()
         response = self.authorized_client.get(reverse('posts:index'))
-        cach_three = response.content
+        cleaned_page = response.content
         self.assertNotEqual(
-            cach_one,
-            cach_three
+            full_page,
+            cleaned_page
         )
