@@ -113,8 +113,9 @@ class PostUrlTest(TestCase):
         )
 
     def test_url_authorized_exists_at_desired_location(self):
-        """Создание, комментирование, подписаться и отписаться
-        доступно только авторизованному пользователю."""
+        """Доступно только авторизованному пользователю.
+        создание, комментирование, подписаться и отписаться
+        """
         post_urls = (
             '/create/',
             f'/posts/{self.post.id}/comment/',

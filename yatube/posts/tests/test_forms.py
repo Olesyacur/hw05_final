@@ -69,11 +69,24 @@ class PostCreateFormTests(TestCase):
     def test_create_post_new_post(self):
         """При отправке валидной формы создается новый пост."""
         posts_count = Post.objects.count()
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded_2 = SimpleUploadedFile(
+            name='small_gif_2.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
 
         form_data = {
             'group': PostCreateFormTests.post.group.id,
             'text': PostCreateFormTests.post.text,
-            'image': PostCreateFormTests.uploaded,
+            'image': uploaded_2,
         }
         self.author_client.post(
             reverse('posts:post_create'),
@@ -86,9 +99,8 @@ class PostCreateFormTests(TestCase):
                 author=PostCreateFormTests.post.author,
                 text=PostCreateFormTests.post.text,
                 group=PostCreateFormTests.post.group.id,
-                image=PostCreateFormTests.post.image,
-                id=PostCreateFormTests.post.id,
-            ).exclude().exists()
+                image='posts/small_gif_2.gif'
+            ).exclude(id=PostCreateFormTests.post.id).exists()
         )
 
     def test_create_new_post_existing_slug(self):
