@@ -79,13 +79,12 @@ class PostCreateFormTests(TestCase):
             'text': PostCreateFormTests.post.text,
             'image': uploaded,
         }
-        self.author_client.post(
+        response = self.author_client.post(
             reverse('posts:post_create'),
             data=form_data,
             follow=True
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
-        post: Post = Post.objects.get(id=self.post.id)
         self.assertTrue(
             Post.objects.filter(
                 author=PostCreateFormTests.post.author,
@@ -93,6 +92,12 @@ class PostCreateFormTests(TestCase):
                 group=PostCreateFormTests.post.group.id,
                 image=f'posts/{uploaded.name}'
             ).exclude(id=PostCreateFormTests.post.id).exists()
+        )
+        self.assertRedirects(
+            response, reverse(
+                'posts:profile',
+                kwargs={'username': self.post.author}
+            )
         )
 
     def test_create_new_post_existing_slug(self):

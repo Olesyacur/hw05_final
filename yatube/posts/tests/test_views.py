@@ -219,6 +219,8 @@ class FollowViewsTest(TestCase):
         self.authorized_client_2 = Client()
         self.authorized_client_2.force_login(self.not_follower)
 
+        cache.clear()
+
     def test_follow(self):
         """Авторизированный пользователь может
         подписаться на других пользователей.
