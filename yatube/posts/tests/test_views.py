@@ -1,4 +1,3 @@
-from doctest import master
 from http import HTTPStatus
 import shutil
 import tempfile
