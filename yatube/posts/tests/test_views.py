@@ -1,3 +1,4 @@
+from doctest import master
 from http import HTTPStatus
 import shutil
 import tempfile
@@ -196,6 +197,7 @@ class PostPagesTests(TestCase):
 
 
 class FollowViewsTest(TestCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -214,19 +216,20 @@ class FollowViewsTest(TestCase):
         )
 
     def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.follower)
-        self.authorized_client_2 = Client()
-        self.authorized_client_2.force_login(self.not_follower)
+        self.follower_client = Client()
+        self.follower_client.force_login(self.follower)
+        self.non_follower_client = Client()
+        self.non_follower_client.force_login(self.not_follower)
 
         cache.clear()
 
     def test_follow(self):
-        """Авторизированный пользователь может
-        подписаться на других пользователей.
+        """Подписка на других пользователей.
+
+        Для авторизованного пользователя
         """
         following = self.follower.following.count()
-        response = self.authorized_client.post(
+        response = self.follower_client.post(
             reverse('posts:profile_follow', kwargs={
                 'username': self.master.username
             }
@@ -236,13 +239,17 @@ class FollowViewsTest(TestCase):
             'posts:profile', kwargs={'username': self.master.username})
         )
         self.assertEqual(Follow.objects.count(), following + 1)
+        subscript = Follow.objects.first()
+        self.assertEqual(subscript.user, self.follower)
+        self.assertEqual(subscript.author, self.master)
 
     def test_unfollow(self):
-        """Авторизированный пользователь может
-        отписаться от других пользователей.
+        """Отписка на других пользователей.
+
+        Для авторизованного пользователя
         """
-        following = self.follower.following.count()
-        response = self.authorized_client.post(
+        Follow.objects.create(user=self.follower, author=self.master)
+        response = self.follower_client.post(
             reverse('posts:profile_unfollow', kwargs={
                 'username': self.master.username
             }
@@ -251,26 +258,21 @@ class FollowViewsTest(TestCase):
         self.assertRedirects(response, reverse(
             'posts:profile', kwargs={'username': self.master.username})
         )
-        self.assertEqual(Follow.objects.count(), following)
+        self.assertEqual(Follow.objects.count(), 0)
 
     def test_new_post_follower(self):
         """Пост отображается в ленте у подписчиков."""
         Follow.objects.create(user=self.follower, author=self.master)
-        response = self.authorized_client.post(
+        response = self.follower_client.post(
             reverse('posts:follow_index'))
         self.assertIn(
-            FollowViewsTest.post, response.context['page_obj']
-        )
-        response = self.authorized_client_2.post(
-            reverse('posts:follow_index'))
-        self.assertNotIn(
             FollowViewsTest.post, response.context['page_obj']
         )
 
     def test_new_post_not_follower(self):
         """Пост не отображается в ленте у не подписчиков."""
         Follow.objects.create(user=self.follower, author=self.master)
-        response = self.authorized_client_2.post(
+        response = self.non_follower_client.post(
             reverse('posts:follow_index'))
         self.assertNotIn(
             FollowViewsTest.post, response.context['page_obj']
