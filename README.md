@@ -1,3 +1,28 @@
-# hw05_final
+# **YATUBE**
+### Социальная сеть для публикации дневников зарегистрированных пользователей
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+В данном приложении:
+
+- Создаем и ведем личный дневник
+- Оформляем подписки на других авторов
+- Оставляем комментарии у других авторов и блокируем спам у себя
+
+### Технологии
+
+- Python 3.7
+- Django 2.2.19
+
+### Запуск dev-сервера и первый коммит
+
+- Установите и активируйте виртуальное окружение
+- Установите зависимости из файла requirements.txt
+```
+pip install -r requirements.txt
+```
+- В папке с файлом manage.py выполните команду:
+```
+python3 manage.py runserver
+```
+
+### Автор
+Чурсина Олеся
